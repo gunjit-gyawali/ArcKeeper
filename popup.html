@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anime Progress Tracker</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body data-theme="dark">
+    <div class="container">
+     <div class="header">
+        <h1>Progress Tracker</h1>
+        <button id="darkModeToggle" class="icon-btn" title="Toggle Dark Mode">☀️</button>
+     </div>
+
+    <div class="toolbar">
+      <button id="statsBtn" class="toolbar-btn">Stats</button>
+      <button id="exportBtn" class="toolbar-btn">Export</button>
+      <button id="importBtn" class="toolbar-btn">Import</button>
+      <input type="file" id="importFile" accept=".json" style="display: none;">
+    </div>
+
+    <form id="progressForm">
+        <div class="form-group">
+            <label for="titleInput">Anime/Manga Title</label>
+            <input type="text" id="titleInput" placeholder="e.g. One Piece" required>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="typeSelect">Type</label>
+                <select id="typeSelect">
+                    <option value="anime">Anime</option>
+                    <option value="manga">Manga</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+          <label for="statusSelect">Status</label>
+          <select id="statusSelect">
+            <option value="watching">Watching</option>
+            <option value="completed">Completed</option>
+            <option value="on-hold">On Hold</option>
+            <option value="dropped">Dropped</option>
+            <option value="plan-to-watch">Plan to Watch</option>
+          </select>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label for="seasonInput">Season (Optional)</label>
+            <input type="number" id="seasonInput" min="1" placeholder="e.g. 2">
+        </div>
+
+        <div class="form-group">
+            <label for="progressInput">Episode/Chapter</label>
+            <input type="number" id="progressInput" min="0" placeholder="e.g. 42" required>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="ratingInput">Rating (Optional)</label>
+        <div class="rating-input">
+            <input type="number" id="ratingInput" min="0" max="10" step="0.5" placeholder="0-10">
+            <span class="rating-display">★ <span id="ratingValue">0</span>/10</span>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="notesInput">Notes (Optional)</label>
+        <input type="text" id="notesInput" placeholder="e.g. Final Battle of arc!">
+    </div>
+
+    <button type="submit" class="btn-save" id="saveBtn">Save Progress</button>
+    </form>
+
+    <div class="divider"></div>
+
+    <div class="saved-section">
+        <div class="section-header">
+            <h2>Saved Progress</h2>
+            <select id="sortSelect" class="sort-select">
+                <option value="date-desc">Newest First</option>
+                <option value="date-asc">Oldest First</option>
+                <option value="title-asc">Title A-Z</option>
+                <option value="title-desc">Title Z-A</option>
+                <option value="progress-desc">Progress High-Low</option>
+                <option value="progress-asc">Progress Low-High</option>
+            </select>
+        </div>
+
+        <div class="filter-bar">
+            <input type="text" id="searchInput" placeholder="Search titles..." class="search-input">
+            <select id="filterType" class="filter-select">
+                <option value="all">All Types</option>
+                <option value="anime">Anime Only</option>
+                <option value="manga">Manga Only</option>
+            </select>
+        <select id="filterStatus" class="filter-select">
+          <option value="all">All Status</option>
+          <option value="watching">Watching</option>
+          <option value="completed">Completed</option>
+          <option value="on-hold">On Hold</option>
+          <option value="dropped">Dropped</option>
+          <option value="plan-to-watch">Plan to Watch</option>
+            </select>
+        </div>
+
+        <div id="savedList" class="saved-list"></div>
+        <div id="emptyMessage" class="empty-message">No saved progress yet!</div>
+    </div>
+    </div>
+
+    <div id="statsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Your Statistics</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div id="statsContent" class="stats-content"></div>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Confirm Action</h2>
+            </div>
+            <p id="confirmMessage" class="confirm-message"></p>
+            <div class="modal-actions">
+                <button id="confirmYes" class="btn-confirm">Yes</button>
+                <button id="confirmNo" class="btn-cancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Entry</h2>
+                <button class="close-btn" id="closeEditModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <input type="hidden" id="editEntryId">
+                    
+                    <div class="form-group">
+                        <label for="editTitleInput">Anime/Manga Title</label>
+                        <input type="text" id="editTitleInput" placeholder="e.g. One Piece" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editTypeSelect">Type</label>
+                            <select id="editTypeSelect">
+                                <option value="anime">Anime</option>
+                                <option value="manga">Manga</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editStatusSelect">Status</label>
+                            <select id="editStatusSelect">
+                                <option value="watching">Watching</option>
+                                <option value="completed">Completed</option>
+                                <option value="on-hold">On Hold</option>
+                                <option value="dropped">Dropped</option>
+                                <option value="plan-to-watch">Plan to Watch</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editSeasonInput">Season (Optional)</label>
+                            <input type="number" id="editSeasonInput" min="1" placeholder="e.g. 2">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editProgressInput">Episode/Chapter</label>
+                            <input type="number" id="editProgressInput" min="0" placeholder="e.g. 42" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editRatingInput">Rating (Optional)</label>
+                        <div class="rating-input">
+                            <input type="number" id="editRatingInput" min="0" max="10" step="0.5" placeholder="0-10">
+                            <span class="rating-display">★ <span id="editRatingValue">0</span>/10</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editNotesInput">Notes (Optional)</label>
+                        <input type="text" id="editNotesInput" placeholder="e.g. Final Battle of arc!">
+                    </div>
+
+                    <button type="submit" class="btn-save">Update Entry</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
